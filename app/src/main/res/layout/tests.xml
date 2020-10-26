@@ -2,14 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp">
 
     <TextView
-        android:id="@+id/asdf"
+        android:id="@+id/tv_tipe_sensor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#0400FF"
-        android:textColor="#F8EFEF"
-        android:textSize="36sp" />
+        android:textSize="24sp"
+        android:text="Tipe Sensor"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:layout_marginTop="4dp"
+        android:id="@+id/tv_nama_sensor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:text="Nama Sensor"/>
 
 </LinearLayout>

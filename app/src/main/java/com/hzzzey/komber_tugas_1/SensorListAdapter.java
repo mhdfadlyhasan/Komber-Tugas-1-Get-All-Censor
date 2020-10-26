@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class SensorListAdapter  extends RecyclerView.Adapter<SensorListAdapter.SensorViewHolder> {
+public class SensorListAdapter extends RecyclerView.Adapter<SensorListAdapter.SensorViewHolder> {
     private List<Sensor> mDataset;
 
     public SensorListAdapter(List<Sensor> deviceSensors) {
@@ -23,10 +23,11 @@ public class SensorListAdapter  extends RecyclerView.Adapter<SensorListAdapter.S
 
     public static class SensorViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        public TextView textView;
+        public TextView tvTipe, tvNama;
         public SensorViewHolder(View v) {
             super(v);
-            textView = v.findViewById(R.id.asdf);
+            tvTipe = v.findViewById(R.id.tv_tipe_sensor);
+            tvNama = v.findViewById(R.id.tv_nama_sensor);
         }
     }
 
@@ -42,7 +43,8 @@ public class SensorListAdapter  extends RecyclerView.Adapter<SensorListAdapter.S
 
     @Override
     public void onBindViewHolder(@NonNull SensorListAdapter.SensorViewHolder holder, int position) {
-        holder.textView.setText(mDataset.get(position).getName());
+        holder.tvTipe.setText(mDataset.get(position).getStringType());
+        holder.tvNama.setText(mDataset.get(position).getName());
         Log.d("sensor", "ini" + mDataset.get(position).getName());
     }
 
