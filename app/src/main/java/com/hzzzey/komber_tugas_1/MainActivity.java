@@ -5,10 +5,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import java.util.List;
 
@@ -35,5 +37,11 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new SensorListAdapter(deviceSensors);
         recyclerView.setAdapter(mAdapter);
         Log.d("sensor",deviceSensors.toString());
+    }
+
+
+    public void goToSensorListener(View view){
+        Intent intent = new Intent(this,SensorListener.class);
+        startActivity(intent);
     }
 }
