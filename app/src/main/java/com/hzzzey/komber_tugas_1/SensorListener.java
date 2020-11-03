@@ -12,24 +12,20 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SensorListener extends AppCompatActivity implements SensorEventListener {
-    private Sensor mSensorProximity;
     private Sensor mSensorLight;
-    private Sensor mGameRotation;
+    private Sensor mAccelometer;
     SensorManager mSensorManager;
-    public TextView mLightSensorValue, mProximitySensorValue,mGameRotationSensorValue;
+    public TextView mLightSensorValue, mAccelometerValue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensor_listener);
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mSensorProximity = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
         mSensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        mGameRotation = mSensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+        mAccelometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         mLightSensorValue = findViewById(R.id.light_sensor_value);
-        mProximitySensorValue = findViewById(R.id.proximity_sensor_value);
-        mGameRotationSensorValue = findViewById(R.id.game_rotation_sensor_value);
-        Log.d("sensorvalue", mGameRotation.toString());
+        mAccelometerValue = findViewById(R.id.game_rotation_sensor_value);
 
 
     }
@@ -44,13 +40,8 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
                 // Handle light sensor
                 mLightSensorValue.setText(currentValue+"");
                 break;
-            case Sensor.TYPE_PROXIMITY:
-                //Proximity
-                mProximitySensorValue.setText(currentValue+"");
-                break;
-            case Sensor.TYPE_GAME_ROTATION_VECTOR:
-                //GamerotationSensor
-                mGameRotationSensorValue.setText(currentValue+"");
+            case Sensor.TYPE_ACCELEROMETER:
+                mAccelometerValue.setText(currentValue+"");
                 break;
             default:
                 // do nothing
@@ -66,16 +57,12 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
     protected void onStart() {
         super.onStart();
 
-        if (mSensorProximity != null) {
-            mSensorManager.registerListener(this, mSensorProximity,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
         if (mSensorLight != null) {
             mSensorManager.registerListener(this, mSensorLight,
                     SensorManager.SENSOR_DELAY_NORMAL);
         }
-        if (mGameRotation != null) {
-            mSensorManager.registerListener(this, mGameRotation,
+        if (mAccelometer != null) {
+            mSensorManager.registerListener(this, mAccelometer,
                     SensorManager.SENSOR_DELAY_NORMAL);
         }
     }

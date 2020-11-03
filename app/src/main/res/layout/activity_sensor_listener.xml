@@ -8,6 +8,12 @@
     tools:context=".SensorListener">
 
     <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Light Sensor" />
+
+    <TextView
         android:id="@+id/light_sensor_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,16 +22,15 @@
         tools:layout_editor_absoluteY="42dp" />
 
     <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Accelometer" />
+
+    <TextView
         android:id="@+id/game_rotation_sensor_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView" />
-
-    <TextView
-        android:id="@+id/proximity_sensor_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:text="TextView" />
 
 </LinearLayout>
