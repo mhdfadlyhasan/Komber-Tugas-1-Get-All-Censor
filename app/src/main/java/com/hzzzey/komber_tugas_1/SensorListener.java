@@ -24,7 +24,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SensorListener extends AppCompatActivity implements SensorEventListener {
+public class SensorListener extends AppCompatActivity implements SensorEventListener, View.OnClickListener {
     private Sensor mSensorLight;
     private Sensor mAcceloMeter;
     int i=0;
@@ -36,6 +36,20 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
     Vibrator vibe;
     Button button;
     public TextView mLightSensorValue, mAccelometerValue;
+
+    // disini aman ga ya, kalo dimasukin ke StartStopTracking ntar fast as fuck
+    Thread t = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            SystemClock.sleep(3000);
+            started = !started;
+            vibe.vibrate(1000);
+            SystemClock.sleep(15000);
+            started = !started;
+            vibe.vibrate(1000);
+        }
+    });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +60,12 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         mLightSensorValue = findViewById(R.id.light_sensor_value);
         mAccelometerValue = findViewById(R.id.game_rotation_sensor_value);
         LineChartAccel = (LineChart) findViewById(R.id.accelMeterChart);
+
         button = findViewById(R.id.buttonstartstop);
+        button.setTag(0);
+        button.setText("start tracking");
+        button.setOnClickListener(this);
+
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         entriesX = new ArrayList<Entry>();
         entriesY = new ArrayList<Entry>();
@@ -64,6 +83,7 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         LineChartAccel.setData(data);
         LineChartAccel.invalidate();
     }
+
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -101,26 +121,19 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
             LineChartAccel.invalidate();
         }
     }
-    public void StartStopTracking(View v){
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SystemClock.sleep(3000);
-                started = !started;
-                vibe.vibrate(1000);
-                SystemClock.sleep(15000);
-                started = !started;
-                vibe.vibrate(1000);
-            }
-        });
-        t.start();
-    }
+//    entah kenapa ga pakai ini, work2 aja
+//    public void StartStopTracking(View v){
+//
+////        t.start();
+//
+//    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -131,6 +144,19 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         if (mAcceloMeter != null) {
             mSensorManager.registerListener(this, mAcceloMeter,
                     SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+//  biar teks tombolnya bisa ganti, sama switch tracking
+    @Override
+    public void onClick(View view) {
+        if(started == false){
+            button.setText("stop tracking");
+            started = true;
+        }
+        else{
+            button.setText("start tracking");
+            started = false;
         }
     }
 }

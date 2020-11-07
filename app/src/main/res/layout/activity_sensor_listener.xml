@@ -25,7 +25,7 @@
         android:id="@+id/textView3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Accelometer" />
+        android:text="Accelerometer" />
 
     <TextView
         android:id="@+id/game_rotation_sensor_value"
@@ -37,8 +37,8 @@
         android:id="@+id/buttonstartstop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="StartStopTracking"
-        android:text="start tracking" />
+
+        />
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/accelMeterChart"
