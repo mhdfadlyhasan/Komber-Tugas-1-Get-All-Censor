@@ -33,4 +33,15 @@
         android:layout_height="wrap_content"
         android:text="TextView" />
 
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="StartStopTracking"
+        android:text="start tracking" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/accelMeterChart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>
