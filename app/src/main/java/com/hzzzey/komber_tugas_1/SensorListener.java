@@ -7,10 +7,12 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -31,6 +33,8 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
     LineChart LineChartAccel;
     List<Entry> entriesX,entriesY,entriesZ;
     LineDataSet dataSetX,dataSetY,dataSetZ;
+    Vibrator vibe;
+    Button button;
     public TextView mLightSensorValue, mAccelometerValue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +46,11 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         mLightSensorValue = findViewById(R.id.light_sensor_value);
         mAccelometerValue = findViewById(R.id.game_rotation_sensor_value);
         LineChartAccel = (LineChart) findViewById(R.id.accelMeterChart);
+        button = findViewById(R.id.buttonstartstop);
+        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         entriesX = new ArrayList<Entry>();
         entriesY = new ArrayList<Entry>();
         entriesZ = new ArrayList<Entry>();
-
-        entriesX.add(new Entry(0,0));
-        entriesY.add(new Entry(0,0));
-        entriesZ.add(new Entry(0,0));
 
         dataSetX = new LineDataSet(entriesX,"Value X");
         dataSetX.setColor(Color.GREEN);
@@ -61,11 +63,6 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         LineData data = new LineData(dataSetX,dataSetY,dataSetZ);
         LineChartAccel.setData(data);
         LineChartAccel.invalidate();
-//
-//
-//        dataSetX.addEntry(new Entry(1,1));
-//        dataSetY.addEntry(new Entry(2,2));
-//        dataSetZ.addEntry(new Entry(3,3));
     }
 
     @Override
@@ -80,20 +77,20 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
                 mLightSensorValue.setText(currentValue+"");
                 break;
             case Sensor.TYPE_ACCELEROMETER:
-                addValue(i,event);
-                i++;
+                addValue(event);
                 mAccelometerValue.setText(currentValue+"");
                 break;
             default:
                 // do nothing
         }
     }
-    public void addValue(int i, SensorEvent event){
+    public void addValue(SensorEvent event){
         if (started){
 
+            i++;
             dataSetX.addEntry(new Entry(i, event.values[0]));
             dataSetY.addEntry(new Entry(i, event.values[1]));
-            dataSetZ.addEntry(new Entry(i, -10+event.values[2]));
+            dataSetZ.addEntry(new Entry(i, event.values[2]));
 
             dataSetX.notifyDataSetChanged();
             dataSetY.notifyDataSetChanged();
@@ -105,7 +102,19 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         }
     }
     public void StartStopTracking(View v){
-        started = !started;
+
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SystemClock.sleep(3000);
+                started = !started;
+                vibe.vibrate(1000);
+                SystemClock.sleep(15000);
+                started = !started;
+                vibe.vibrate(1000);
+            }
+        });
+        t.start();
     }
 
     @Override
