@@ -36,9 +36,13 @@
     <Button
         android:id="@+id/buttonstartstop"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="wrap_content" />
 
-        />
+    <Button
+        android:id="@+id/btn_save_record"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Record"/>
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/accelMeterChart"

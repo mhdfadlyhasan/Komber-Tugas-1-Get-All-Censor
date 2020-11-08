@@ -28,25 +28,27 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
     private Sensor mSensorLight;
     private Sensor mAcceloMeter;
     int i=0;
-    Boolean started = false;
+
+    Boolean record = false, kill = false;
     SensorManager mSensorManager;
     LineChart LineChartAccel;
     List<Entry> entriesX,entriesY,entriesZ;
     LineDataSet dataSetX,dataSetY,dataSetZ;
     Vibrator vibe;
-    Button button;
+    Button button, btnSave;
     public TextView mLightSensorValue, mAccelometerValue;
 
     // disini aman ga ya, kalo dimasukin ke StartStopTracking ntar fast as fuck
     Thread t = new Thread(new Runnable() {
         @Override
         public void run() {
-            SystemClock.sleep(3000);
-            started = !started;
-            vibe.vibrate(1000);
-            SystemClock.sleep(15000);
-            started = !started;
-            vibe.vibrate(1000);
+            long timer = System.currentTimeMillis();
+
+            while (!kill) {
+                // stop record data setiap 10 detik
+                if (System.currentTimeMillis() - timer < 10000) record = true;
+                else record = false;
+            }
         }
     });
 
@@ -62,9 +64,11 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         LineChartAccel = (LineChart) findViewById(R.id.accelMeterChart);
 
         button = findViewById(R.id.buttonstartstop);
+        btnSave = findViewById(R.id.btn_save_record);
         button.setTag(0);
         button.setText("start tracking");
         button.setOnClickListener(this);
+        btnSave.setOnClickListener(this);
 
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         entriesX = new ArrayList<Entry>();
@@ -78,16 +82,13 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         dataSetZ = new LineDataSet(entriesZ,"Value Z");
         dataSetZ.setColor(Color.BLUE);
 
-
         LineData data = new LineData(dataSetX,dataSetY,dataSetZ);
         LineChartAccel.setData(data);
         LineChartAccel.invalidate();
     }
 
-
     @Override
     public void onSensorChanged(SensorEvent event) {
-
         int sensorType = event.sensor.getType();
         float currentValue = event.values[0];
         switch (sensorType) {
@@ -97,37 +98,16 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
                 mLightSensorValue.setText(currentValue+"");
                 break;
             case Sensor.TYPE_ACCELEROMETER:
-                addValue(event);
+                if (record) {
+                    addValue(event);
+                    SystemClock.sleep(100);
+                }
                 mAccelometerValue.setText(currentValue+"");
                 break;
             default:
                 // do nothing
         }
     }
-    public void addValue(SensorEvent event){
-        if (started){
-
-            i++;
-            dataSetX.addEntry(new Entry(i, event.values[0]));
-            dataSetY.addEntry(new Entry(i, event.values[1]));
-            dataSetZ.addEntry(new Entry(i, event.values[2]));
-
-            dataSetX.notifyDataSetChanged();
-            dataSetY.notifyDataSetChanged();
-            dataSetZ.notifyDataSetChanged();
-
-            LineChartAccel.getLineData().notifyDataChanged();
-            LineChartAccel.notifyDataSetChanged();
-            LineChartAccel.invalidate();
-        }
-    }
-
-//    entah kenapa ga pakai ini, work2 aja
-//    public void StartStopTracking(View v){
-//
-////        t.start();
-//
-//    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -147,16 +127,45 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         }
     }
 
-//  biar teks tombolnya bisa ganti, sama switch tracking
+    //  biar teks tombolnya bisa ganti, sama switch tracking
     @Override
     public void onClick(View view) {
-        if(started == false){
-            button.setText("stop tracking");
-            started = true;
+        switch (view.getId()) {
+            case R.id.buttonstartstop :
+                t.start();
+                break;
+            case R.id.btn_save_record:
+                break;
+            default:
+                break;
         }
-        else{
-            button.setText("start tracking");
-            started = false;
-        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Isi supaya LineChart rilis mem yang dipake
+        t.interrupt();
+        kill = true;
+    }
+
+    private void isExternalStorageWritable() {
+
+    }
+
+    public void addValue(SensorEvent event){
+        i++;
+        dataSetX.addEntry(new Entry(i, event.values[0]));
+        dataSetY.addEntry(new Entry(i, event.values[1]));
+        dataSetZ.addEntry(new Entry(i, event.values[2]));
+
+        dataSetX.notifyDataSetChanged();
+        dataSetY.notifyDataSetChanged();
+        dataSetZ.notifyDataSetChanged();
+
+        LineChartAccel.getLineData().notifyDataChanged();
+        LineChartAccel.notifyDataSetChanged();
+        LineChartAccel.invalidate();
     }
 }
