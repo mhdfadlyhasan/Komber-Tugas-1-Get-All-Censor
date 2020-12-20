@@ -8,9 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.AudioAttributes;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -42,7 +40,7 @@ import java.util.List;
 public class SensorListener extends AppCompatActivity implements SensorEventListener, View.OnClickListener {
     private Sensor mSensorLight;
     private Sensor mAcceloMeter;
-    int i=0, iter = 1;
+    int i=0,j=0, iter = 1;
 
     Boolean record = false, kill = false;
     long timer;
@@ -58,28 +56,18 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         @Override
         public void run() {
                 // TODO tambah fitur detect delay
+
                 for (int paksi=0; paksi<=30;){
-                    if (System.currentTimeMillis() - timer < 2000) {
+                    if (j<20) {
                         record = true;
                     }
                     else {
+                        j=0;
                         record = false;
                         // Ada dua karena sdk 26 keatas beda fungsi
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            vibe.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
-                        } else {
-                            //deprecated in API 26
-                            vibe.vibrate(100);
-                        }
                         Mstop.start();
                         SystemClock.sleep(2000);
                         timer = System.currentTimeMillis(); //reset timer
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            vibe.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
-                        } else {
-                            //deprecated in API 26
-                            vibe.vibrate(100);
-                        }
                         mPlay.start();
                         paksi++;
                     }
@@ -203,13 +191,6 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
                    SystemClock.sleep(5000);
                    mPlay.start();
                    timer = System.currentTimeMillis();
-                   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                       vibe.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
-                   } else {
-                       //deprecated in API 26
-                       vibe.vibrate(100);
-                   }
-                   timer = System.currentTimeMillis();
                    t.start();
                }
                else {
@@ -265,6 +246,7 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
 
     public void addValue(SensorEvent event){
         i++;
+        j++;
         Log.d("sensorval" , String.valueOf(i));
         dataSetX.addEntry(new Entry(i, event.values[0]));
         dataSetY.addEntry(new Entry(i, event.values[1]));
@@ -277,6 +259,7 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         LineChartAccel.getLineData().notifyDataChanged();
         LineChartAccel.notifyDataSetChanged();
         LineChartAccel.invalidate();
+
     }
 
     private boolean checkPermission(String permission) {
