@@ -55,32 +55,52 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
     Thread t = new Thread(new Runnable() {
         @Override
         public void run() {
-                // TODO tambah fitur detect delay
-
-                for (int paksi=0; paksi<=30;){
-                    if (j<20) {
-                        record = true;
-                    }
-                    else {
-                        j=0;
-                        record = false;
-                        // Ada dua karena sdk 26 keatas beda fungsi
-                        Mstop.start();
-                        SystemClock.sleep(2000);
-                        timer = System.currentTimeMillis(); //reset timer
+            // TODO tambah fitur detect delay
+            for (int paksi = 0; paksi <= 3; ) {
+                if (j < 20) {
+                    record = true;
+                } else {
+                    j = 0;
+                    record = false;
+                    Mstop.start();
+                    SystemClock.sleep(2000);
+                    timer = System.currentTimeMillis(); //reset timer
+                    mPlay.start();
+                    paksi++;
+                }
+            }
+            record = false;
+            s.interrupt();
+            if (!btnSave.isEnabled()) runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    btnSave.setEnabled(true);
+                }
+            });
+        }
+    });
+    Thread s = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (true)
+            {
+                if(!t.isAlive()){
+                    if(System.currentTimeMillis() - timer > 10000)
+                    {
                         mPlay.start();
-                        paksi++;
+                        timer = System.currentTimeMillis();
+                        t.start();
+                        break;
                     }
                 }
-                record = false;
-                if (!btnSave.isEnabled()) runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        btnSave.setEnabled(true);
-                    }
-                });
+                else {
+                    t.interrupt();
+                    record = false;
+                    break;
+                }
             }
-    });
+
+        }});
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,11 +166,6 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         int sensorType = event.sensor.getType();
         float currentValue = event.values[0];
         switch (sensorType) {
-            // Event came from the light sensor.
-            case Sensor.TYPE_LIGHT:
-                // Handle light sensor
-                mLightSensorValue.setText(currentValue+"");
-                break;
             case Sensor.TYPE_ACCELEROMETER:
                 if (record) {
                     //todo add value was here
@@ -187,16 +202,9 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.buttonstartstop :
-               if(!t.isAlive()){
-                   SystemClock.sleep(5000);
-                   mPlay.start();
-                   timer = System.currentTimeMillis();
-                   t.start();
-               }
-               else {
-                   t.interrupt();
-                   record = false;
-               }
+                timer = System.currentTimeMillis();
+//                jalankan thread baru
+                s.start();
                 break;
             case R.id.btn_save_record:
                 t.interrupt();
