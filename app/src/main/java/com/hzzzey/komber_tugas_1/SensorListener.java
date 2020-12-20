@@ -56,7 +56,7 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         @Override
         public void run() {
             // TODO tambah fitur detect delay
-            for (int paksi = 0; paksi <= 3; ) {
+            for (int paksi = 0; paksi <= 30; ) {
                 if (j < 20) {
                     record = true;
                 } else {
