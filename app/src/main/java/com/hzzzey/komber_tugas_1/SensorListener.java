@@ -1,4 +1,4 @@
-package com.hzzzey.komber_tugas_1;
+ package com.hzzzey.komber_tugas_1;
 
 import android.Manifest;
 import android.content.Context;
@@ -8,10 +8,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +26,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -48,24 +53,45 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
     Vibrator vibe;
     Button button, btnSave;
     public TextView mLightSensorValue, mAccelometerValue;
-
+    MediaPlayer mPlay, Mstop;
     Thread t = new Thread(new Runnable() {
         @Override
         public void run() {
-            while (!kill) {
-                // stop record data setelah 10 detik
-                if (System.currentTimeMillis() - timer < 10000) record = true;
-                else {
-                    record = false;
-                    if (!btnSave.isEnabled()) runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            btnSave.setEnabled(true);
+                // TODO tambah fitur detect delay
+                for (int paksi=0; paksi<=30;){
+                    if (System.currentTimeMillis() - timer < 2000) {
+                        record = true;
+                    }
+                    else {
+                        record = false;
+                        // Ada dua karena sdk 26 keatas beda fungsi
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vibe.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+                        } else {
+                            //deprecated in API 26
+                            vibe.vibrate(100);
                         }
-                    });
+                        Mstop.start();
+                        SystemClock.sleep(2000);
+                        timer = System.currentTimeMillis(); //reset timer
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            vibe.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+                        } else {
+                            //deprecated in API 26
+                            vibe.vibrate(100);
+                        }
+                        mPlay.start();
+                        paksi++;
+                    }
                 }
+                record = false;
+                if (!btnSave.isEnabled()) runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        btnSave.setEnabled(true);
+                    }
+                });
             }
-        }
     });
 
     @Override
@@ -109,6 +135,9 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
         LineData data = new LineData(dataSetX,dataSetY,dataSetZ);
         LineChartAccel.setData(data);
         LineChartAccel.invalidate();
+        mPlay = MediaPlayer.create(SensorListener.this, R.raw.beep02);
+        Mstop  = MediaPlayer.create(SensorListener.this, R.raw.beepdone);
+
     }
 
     @Override
@@ -136,6 +165,7 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
                 break;
             case Sensor.TYPE_ACCELEROMETER:
                 if (record) {
+                    //todo add value was here
                     addValue(event);
                     SystemClock.sleep(100);
                 }
@@ -169,27 +199,40 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.buttonstartstop :
-                timer = System.currentTimeMillis();
-                t.start();
+               if(!t.isAlive()){
+                   SystemClock.sleep(5000);
+                   mPlay.start();
+                   timer = System.currentTimeMillis();
+                   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                       vibe.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+                   } else {
+                       //deprecated in API 26
+                       vibe.vibrate(100);
+                   }
+                   timer = System.currentTimeMillis();
+                   t.start();
+               }
+               else {
+                   t.interrupt();
+                   record = false;
+               }
                 break;
             case R.id.btn_save_record:
                 t.interrupt();
                 if (isExternalStorageWritable() && btnSave.isEnabled() && checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     String csv = "", filename = "test" + String.valueOf(iter) + ".csv";
                     File csvFile = new File(getExternalFilesDir(null), filename);
-
                     for (int j = 0; j < entriesX.size() - 1; j++) {
                         String data;
                         data = entriesX.get(j).getY() + "," + entriesY.get(j).getY() + "," + entriesZ.get(j).getY() + "\n";
                         csv = csv.concat(data);
                     }
 
-                    Log.d("Save record", csv);
+                    Log.d("Saverecord", csv);
                     try {
                         FileOutputStream fos = new FileOutputStream(csvFile);
                         fos.write(csv.getBytes());
                         fos.close();
-
                         Toast.makeText(this, "File saved as " + filename, Toast.LENGTH_SHORT).show();
                         iter++;
                         btnSave.setEnabled(false);
@@ -206,7 +249,6 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         // Isi supaya LineChart rilis mem yang dipake
         try {
             t.interrupt();
@@ -223,6 +265,7 @@ public class SensorListener extends AppCompatActivity implements SensorEventList
 
     public void addValue(SensorEvent event){
         i++;
+        Log.d("sensorval" , String.valueOf(i));
         dataSetX.addEntry(new Entry(i, event.values[0]));
         dataSetY.addEntry(new Entry(i, event.values[1]));
         dataSetZ.addEntry(new Entry(i, event.values[2]));
